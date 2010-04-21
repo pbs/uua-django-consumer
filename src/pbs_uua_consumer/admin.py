@@ -68,7 +68,7 @@ if getattr(settings, 'OPENID_USE_AS_ADMIN_LOGIN', False):
             }
             context.update(extra_context or {})
             context_instance = template.RequestContext(request, current_app=self.name)
-            return render_to_response(admin.sites.AdminSite.login_template or 'admin/login.html', context,
+            return render_to_response(admin.sites.AdminSite.login_template or 'admin/openid.login.html', context,
                 context_instance=context_instance
             )
             # Redirect to openid login path,
@@ -76,5 +76,5 @@ if getattr(settings, 'OPENID_USE_AS_ADMIN_LOGIN', False):
                 #settings.LOGIN_URL + "?next=" + request.get_full_path())
 
     # Overide the standard admin login form.
-    admin.sites.AdminSite.login_template = '/home/notroot/projects/merlin/src/merlin/apps/src/pbs_uua_consumer/templates/admin/login.html'
+    admin.sites.AdminSite.login_template = 'admin/openid.login.html'
     admin.sites.AdminSite.display_login_form = _openid_login
