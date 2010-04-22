@@ -25,8 +25,11 @@ class Association(models.Model):
 
 def delete_openid_user(sender, instance=None, **kwargs):
     if instance:
-        openid_user = UserOpenID.objects.get(user=instance)
-        openid_user.delete()
+        try:
+            openid_user = UserOpenID.objects.get(user=instance)
+            openid_user.delete()
+        except UserOpenID.DoesNotExist:
+            pass
 
 
 pre_delete.connect(delete_openid_user, sender=User)
