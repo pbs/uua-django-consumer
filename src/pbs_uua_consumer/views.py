@@ -90,16 +90,14 @@ def render_failure(request, message, status=403,template_name='openid/failure.ht
                     'redirect_to': redirect_to,
                     'message': message,
                     'popup': settings.OPENID_USE_POPUP_MODE,
+                    'sso_js_url': settings.OPENID_SSO_SERVER_JS_URL,
                     }, context_instance=RequestContext(request))
-
-
 
 def parse_openid_response(request):
     """Parse an OpenID response from a Django request."""
     # Short cut if there is no request parameters.
     #if len(request.REQUEST) == 0:
     #    return None
-
     current_url = request.build_absolute_uri()
 
     consumer = make_consumer(request)
@@ -168,18 +166,16 @@ def login_complete(request, redirect_field_name=REDIRECT_FIELD_NAME):
     redirect_to = request.REQUEST.get(redirect_field_name, '')
 
     openid_response = parse_openid_response(request)
-
     if not openid_response:
         return render_failure(
             request, 'This is an OpenID relying party endpoint.')
 
-
+    print "****************************\n%s\n**********************" % openid_response.status
     if openid_response.status == SUCCESS:
         user = authenticate(openid_response=openid_response)
         if user is not None:
             if user.is_active:
                 auth_login(request, user)
-
                 return HttpResponseRedirect(sanitise_redirect_url(redirect_to))
             else:
                 return render_failure(request, 'Disabled account')
