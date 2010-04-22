@@ -1,5 +1,4 @@
 from setuptools import setup, find_packages
-from pbs.utils.setuptools import find_package_data
 
 setup(
     name='pbs_uua_consumer',
@@ -10,5 +9,7 @@ setup(
     packages = find_packages('src'),
     package_dir={'':'src'},
     include_package_data=True,
-    package_data = find_package_data('src'),
+    package_data = {
+        '': ['templates/*.html', 'templates/*/*.html']
+    },
 )

@@ -68,7 +68,7 @@ if getattr(settings, 'OPENID_USE_AS_ADMIN_LOGIN', False):
             }
             context.update(extra_context or {})
             context_instance = template.RequestContext(request, current_app=self.name)
-            return render_to_response(admin.sites.AdminSite.login_template or 'admin/openid.login.html', context,
+            return render_to_response(admin.sites.AdminSite.login_template or 'admin/login.html', context,
                 context_instance=context_instance
             )
             # Redirect to openid login path,
