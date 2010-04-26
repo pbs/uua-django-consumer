@@ -15,7 +15,7 @@ from django.template.loader import render_to_string
 from openid.consumer.consumer import (
     Consumer, SUCCESS, CANCEL, FAILURE)
 from openid.consumer.discover import DiscoveryFailure
-from openid.extensions import sreg
+from openid.extensions import sreg, pape
 
 
 #from pbs_uua_consumer.forms import OpenIDLoginForm
@@ -79,12 +79,15 @@ def render_openid_request(request, openid_request, return_to, trust_root=None):
             trust_root, return_to)
         return HttpResponseRedirect(redirect_url)
     else:
+
         form_html = openid_request.htmlMarkup(
             trust_root, return_to, form_tag_attrs={'id': 'openid_message'})
+
+        # TODO: verify if UTF-8 is default
         return HttpResponse(form_html, content_type='text/html;charset=UTF-8')
 
 
-def render_response(request, message=None, status=403, template_name='openid/response.html', redirect_to=None):
+def render_response(request, message=None, status=200, template_name='openid/response.html', redirect_to=None):
     """Render an error page to the user."""
     response = render_to_string(
         template_name, {
@@ -115,20 +118,12 @@ def login_begin(request, template_name='openid/login.html',
     # to use a fixed server URL.
     openid_url = getattr(settings, 'OPENID_SSO_SERVER_URL', None)
 
-    if openid_url is None:
-        if request.POST:
-            login_form = OpenIDLoginForm(data=request.POST)
-            if login_form.is_valid():
-                openid_url = login_form.cleaned_data['openid_identifier']
-        else:
-            login_form = OpenIDLoginForm()
 
-        # Invalid or no form data:
-        if openid_url is None:
-            return render_to_response(template_name, {
-                    'form': login_form,
-                    redirect_field_name: redirect_to
-                    }, context_instance=RequestContext(request))
+    if openid_url is None:
+        return render_to_response(template_name, {
+                'form': login_form,
+                redirect_field_name: redirect_to
+                }, context_instance=RequestContext(request))
 
     error = None
     consumer = make_consumer(request)
@@ -136,24 +131,29 @@ def login_begin(request, template_name='openid/login.html',
         openid_request = consumer.begin(openid_url)
     except DiscoveryFailure, exc:
         return render_response(
-            request, "OpenID discovery error: %s" % (str(exc),), status=500)
+            request, "OpenID discovery error: %s" % (str(exc),), status=200)
 
-    openid_request.addExtension(SignatureVerification(
-                    settings.UUA_CONSUMER_SHARED_KEY,
-                    settings.UUA_CONSUMER_SECRET_KEY,
-                    make_token(64) #request token to sign
-                ))
+    # TODO: create setting for req signing extension
+    # verify exists keys
+    if hasattr(settings,'UUA_CONSUMER_SHARED_KEY') and hasattr(settings,'UUA_CONSUMER_SECRET_KEY'):
+        openid_request.addExtension(SignatureVerification(
+                        settings.UUA_CONSUMER_SHARED_KEY,
+                        settings.UUA_CONSUMER_SECRET_KEY,
+                        make_token(64) #request token to sign
+                    ))
+
     if settings.OPENID_USE_POPUP_MODE:
         openid_request.addExtension(UIExtension("popup"))
     # Request some user details.
     openid_request.addExtension(
         sreg.SRegRequest(optional=['email', 'fullname', 'nickname']))
-
     # Request team info
 
     # Construct the request completion URL, including the page we
     # should redirect to.
     return_to = request.build_absolute_uri(reverse(login_complete))
+
+    # TODO: use urldecode, parse as list
     if redirect_to:
         if '?' in return_to:
             return_to += '&'
@@ -177,7 +177,10 @@ def login_complete(request, redirect_field_name=REDIRECT_FIELD_NAME):
         if user is not None:
             if user.is_active:
                 auth_login(request, user)
-                return render_response(request, status=200, redirect_to=sanitise_redirect_url(redirect_to))
+                if settings.OPENID_USE_POPUP_MODE:
+                    return render_response(request, status=200, redirect_to=sanitise_redirect_url(redirect_to))
+                else:
+                    return HttpResponseRedirect(redirect_to=sanitise_redirect_url(redirect_to))
             else:
                 return render_response(request, 'Disabled account')
         else:
@@ -197,6 +200,8 @@ def logo(request):
     return HttpResponse(
         OPENID_LOGO_BASE_64.decode('base64'), mimetype='image/gif'
     )
+
+
 
 
 OPENID_LOGO_BASE_64 = """

@@ -5,9 +5,11 @@ from django import http, template
 from django.shortcuts import render_to_response
 from pbs_uua_consumer.models import Nonce, Association, UserOpenID
 from pbs_uua_consumer.store import DjangoOpenIDStore
-
+from django.views.decorators.cache import never_cache
 
 class NonceAdmin(admin.ModelAdmin):
+    """ OpenId Nonces admin form """
+
     list_display = ('server_url', 'timestamp')
     actions = ['cleanup_nonces']
 
@@ -21,6 +23,7 @@ admin.site.register(Nonce, NonceAdmin)
 
 
 class AssociationAdmin(admin.ModelAdmin):
+    """ OpenId Association admin form """
     list_display = ('server_url', 'assoc_type')
     list_filter = ('assoc_type',)
     search_fields = ('server_url',)
@@ -36,6 +39,7 @@ admin.site.register(Association, AssociationAdmin)
 
 
 class UserOpenIDAdmin(admin.ModelAdmin):
+    """ OpenId user admin form """
     list_display = ('user', 'claimed_id')
     search_fields = ('claimed_id',)
 
@@ -44,6 +48,7 @@ admin.site.register(UserOpenID, UserOpenIDAdmin)
 
 # Support for allowing openid authentication for /admin (django.contrib.admin)
 if getattr(settings, 'OPENID_USE_AS_ADMIN_LOGIN', False):
+
     from django.http import HttpResponseRedirect
     from pbs_uua_consumer import views
 
@@ -63,18 +68,16 @@ if getattr(settings, 'OPENID_USE_AS_ADMIN_LOGIN', False):
                 'error_message': error_message,
                 'root_path': self.root_path,
                 'sso_js_url': settings.OPENID_SSO_SERVER_JS_URL,
-                'sso_url': "%s?next=%s" % (settings.LOGIN_URL,request.get_full_path()),
+                'sso_url': "%s?next=%s" % (settings.LOGIN_URL, request.get_full_path()),
                 'popup_mode': settings.OPENID_USE_POPUP_MODE,
             }
             context.update(extra_context or {})
             context_instance = template.RequestContext(request, current_app=self.name)
             return render_to_response(admin.sites.AdminSite.login_template or 'admin/login.html', context,
-                context_instance=context_instance
-            )
-            # Redirect to openid login path,
-            #return HttpResponseRedirect(
-                #settings.LOGIN_URL + "?next=" + request.get_full_path())
+                context_instance=context_instance)
 
-    # Overide the standard admin login form.
-    admin.sites.AdminSite.login_template = 'admin/openid.login.html'
+    login_template = getattr(settings, 'OPENID_ADMIN_LOGIN_TEMPLATE', False)
+    admin.sites.AdminSite.login_template = login_template or 'admin/openid.login.html'
     admin.sites.AdminSite.display_login_form = _openid_login
+
+

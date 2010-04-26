@@ -31,7 +31,6 @@ def delete_openid_user(sender, instance=None, **kwargs):
         except UserOpenID.DoesNotExist:
             pass
 
-
 pre_delete.connect(delete_openid_user, sender=User)
 
 class UserOpenID(models.Model):

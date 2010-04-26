@@ -1,4 +1,4 @@
-{% extends "admin/base_site.html" %}
+{% extends "admin/login.html" %}
 {% load i18n %}
 
 {% block extrastyle %}{% load adminmedia %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% admin_media_prefix %}css/login.css" />{% endblock %}
@@ -6,46 +6,25 @@
 <script type="text/javascript" src="{{ sso_js_url }}jquery/jquery-1.3.2.min.js"></script>
 <script type="text/javascript" src="{{ sso_js_url }}popup.js"></script>
 {% endblock %}
-{% block bodyclass %}login{% endblock %}
-
-{% block content_title %}{% endblock %}
-
-{% block breadcrumbs %}{% endblock %}
 
 {% block content %}
-{% if error_message %}
-<p class="errornote">{{ error_message }}</p>
-{% endif %}
-<div id="content-main">
-{% if popup_mode %}
-    <script>
-    LOGIN_PATH_POPUP_ENABLED = '{{ sso_url }}';
-    LOGIN_PATH_WITH_REDIRECT = '';
-    LOGIN_PROCESSING_PAGE = '';
-    </script>
-{% endif %}
-<form action="{{ app_path }}" method="post" id="login-form">{% csrf_token %}
-  <div class="form-row">
-    <label for="id_username">{% trans 'Username:' %}</label> <input type="text" name="username" id="id_username" />
-  </div>
-  <div class="form-row">
-    <label for="id_password">{% trans 'Password:' %}</label> <input type="password" name="password" id="id_password" />
-    <input type="hidden" name="this_is_the_login_form" value="1" />
-  </div>
-  <div class="form-row">
-    {% if popup_mode %}
-    <a id="uua_login" href="javascript:void(null)" onClick="javascript:loadPopup();">Login with UUA</a>
-    {% else %}
-    <a id="uua_login" href="{{ sso_url }}">Login with UUA</a>
-    {% endif %}
-  </div>
-  <div class="submit-row">
-    <label>&nbsp;</label><input type="submit" value="{% trans 'Log in' %}" />
-  </div>
-</form>
+    {{block.super}}
 
-<script type="text/javascript">
-document.getElementById('id_username').focus()
-</script>
-</div>
+    {% if popup_mode %}
+        <script>
+        LOGIN_PATH_POPUP_ENABLED = '{{ sso_url }}';
+        LOGIN_PATH_WITH_REDIRECT = '';
+        LOGIN_PROCESSING_PAGE = '';
+        </script>
+    {% endif %}
+
+    <p>{% trans 'Or:' %}</p>
+        <div class="form-row" style="text-align:center;">
+            {% if popup_mode %}
+            <a id="uua_login" href="javascript:void(null)" onClick="javascript:loadPopup();">Login with your PBS account</a>
+            {% else %}
+
+            <a id="uua_login" href="{{ sso_url }}">Login with your PBS account</a>
+            {% endif %}
+        </div>
 {% endblock %}

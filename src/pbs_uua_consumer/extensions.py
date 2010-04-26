@@ -68,7 +68,7 @@ class SignatureVerification(Extension):
 
     def getExtensionArgs(self):
         if not self.secret_key:
-            raise RuntimeError("This extension should have the secret_key set.") #todo: graciously handle this in the provider
+            raise RuntimeError("You haven't set the UUA_CONSUMER_SECRET_KEY value in your project settings file")
 
         self.hmac = self._make_hmac(self.secret_key)
 
