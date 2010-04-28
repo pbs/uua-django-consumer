@@ -23,7 +23,7 @@ class GenericTestCase(TestCase):
         from merlin.apps.core import models
         reload(models)
     
-    def test_get_user_by_id(self):
+    def test_get_user(self):
         input = {'user_id' : 1}
         try:
             username = get_user(input.user_id)
@@ -31,7 +31,7 @@ class GenericTestCase(TestCase):
         except:
             pass
     
-    def test_authenticate_by_uua_ok(self):
+    def test_authenticate(self):
         response = {'openid_response' : {'success' : True}}
         try:
             authenticate(response)
