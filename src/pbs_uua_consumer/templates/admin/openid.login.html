@@ -19,11 +19,6 @@
 
     <p>{% trans 'Or:' %}</p>
         <div class="form-row" style="text-align:center;">
-            {% if popup_mode %}
-            <a id="uua_login" href="javascript:void(null)" onClick="javascript:loadPopup();">Login with your PBS account</a>
-            {% else %}
-
-            <a id="uua_login" href="{{ sso_url }}">Login with your PBS account</a>
-            {% endif %}
+           {{ openid_login_link }}
         </div>
 {% endblock %}

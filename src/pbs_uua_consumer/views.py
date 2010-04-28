@@ -8,9 +8,9 @@ from django.contrib.auth import (
 
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.template.loader import render_to_string
+from django.shortcuts import render_to_response
 
 from openid.consumer.consumer import (
     Consumer, SUCCESS, CANCEL, FAILURE)
@@ -93,8 +93,6 @@ def render_response(request, message=None, status=200, template_name='openid/res
         template_name, {
             'redirect_to': redirect_to,
             'message': message,
-            'popup': settings.OPENID_USE_POPUP_MODE,
-            'sso_js_url': settings.OPENID_SSO_SERVER_JS_URL,
         }, context_instance=RequestContext(request))
     return HttpResponse(response, status=status)
 
@@ -200,7 +198,6 @@ def logo(request):
     return HttpResponse(
         OPENID_LOGO_BASE_64.decode('base64'), mimetype='image/gif'
     )
-
 
 
 

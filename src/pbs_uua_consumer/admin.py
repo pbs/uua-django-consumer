@@ -7,6 +7,7 @@ from pbs_uua_consumer.models import Nonce, Association, UserOpenID
 from pbs_uua_consumer.store import DjangoOpenIDStore
 from django.views.decorators.cache import never_cache
 
+
 class NonceAdmin(admin.ModelAdmin):
     """ OpenId Nonces admin form """
 
@@ -67,9 +68,7 @@ if getattr(settings, 'OPENID_USE_AS_ADMIN_LOGIN', False):
                 'app_path': request.get_full_path(),
                 'error_message': error_message,
                 'root_path': self.root_path,
-                'sso_js_url': settings.OPENID_SSO_SERVER_JS_URL,
-                'sso_url': "%s?next=%s" % (settings.LOGIN_URL, request.get_full_path()),
-                'popup_mode': settings.OPENID_USE_POPUP_MODE,
+
             }
             context.update(extra_context or {})
             context_instance = template.RequestContext(request, current_app=self.name)
@@ -79,5 +78,3 @@ if getattr(settings, 'OPENID_USE_AS_ADMIN_LOGIN', False):
     login_template = getattr(settings, 'OPENID_ADMIN_LOGIN_TEMPLATE', False)
     admin.sites.AdminSite.login_template = login_template or 'admin/openid.login.html'
     admin.sites.AdminSite.display_login_form = _openid_login
-
-

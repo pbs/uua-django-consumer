@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+{% load i18n %}
+
+{% block extrahead %}
+<script type="text/javascript" src="{{ sso_js_url }}jquery/jquery.min.js"></script>
+<script type="text/javascript" src="{{ sso_js_url }}popup.js"></script>
+{% endblock %}
+
+{% block content %}
+    {{ block.super }}
+    {% if user.is_authenticated %}
+        {% trans 'Welcome,' %}
+            <strong>{% firstof user.first_name user.username %}</strong>.
+    {% endif %}
+    {% if popup_mode %}
+        <script>
+        LOGIN_PATH_POPUP_ENABLED = '{{ sso_url }}';
+        LOGIN_PATH_WITH_REDIRECT = '';
+        LOGIN_PROCESSING_PAGE = '';
+        </script>
+    {% endif %}
+
+
+    {% if form.errors %}
+    <p>Your username and password didn't match. Please try again.</p>
+    {% endif %}
+
+    <form method="post" action="{% url django.contrib.auth.views.login %}">{% csrf_token %}
+    <table>
+    <tr>
+        <td>{{ form.username.label_tag }}</td>
+        <td>{{ form.username }}</td>
+    </tr>
+    <tr>
+        <td>{{ form.password.label_tag }}</td>
+        <td>{{ form.password }}</td>
+    </tr>
+    </table>
+
+    <input type="submit" value="login" />
+    <input type="hidden" name="next" value="{{ next }}" />
+    </form>
+
+
+    <p>{% trans 'Or:' %}</p>
+    <div class="form-row">
+        {{openid_login_link}}
+    </div>
+{% endblock %}
