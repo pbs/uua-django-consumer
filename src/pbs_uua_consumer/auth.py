@@ -21,7 +21,6 @@ class OpenIDBackend:
             return None
 
     def authenticate(self, **kwargs):
-
         openid_response = kwargs.get('openid_response')
         if openid_response is None:
             return None
