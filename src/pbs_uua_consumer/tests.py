@@ -31,8 +31,8 @@ class GenericTestCase(TestCase):
         
     
     def test_get_user(self):
-        user = self.backend.get_user(1)
-        self.failUnlessEqual(user.username, None)
+        user = self.backend.get_user(-1)
+        self.failUnlessEqual(user, None)
         
         user = self.backend.get_user(2)
         self.failUnlessEqual(user.username, "admin")
