@@ -7,6 +7,9 @@ from pbs_uua_consumer.models import Nonce, Association, UserOpenID
 from pbs_uua_consumer.store import DjangoOpenIDStore
 from django.views.decorators.cache import never_cache
 
+""" Integrates the application with the admin interface.
+Registers admin models and the authentication backend with Django admin.
+"""
 
 class NonceAdmin(admin.ModelAdmin):
     """ OpenId Nonces admin form """

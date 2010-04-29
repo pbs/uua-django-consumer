@@ -6,7 +6,11 @@ from openid.consumer.consumer import SUCCESS
 from openid.extensions import sreg
 from pbs_uua_consumer.models import UserOpenID
 
-
+"""
+Custom authentication backend for the OpenId consumer.
+For further information, consult
+http://docs.djangoproject.com/en/dev/topics/auth/#writing-an-authentication-backend
+"""
 class IdentityAlreadyClaimed(Exception):
     pass
 
@@ -50,6 +54,7 @@ class OpenIDBackend:
         return user
 
     def create_user_from_openid(self, openid_response):
+        """ internal method for creating users from a correct OpenId auth flow """
         sreg_response = sreg.SRegResponse.fromSuccessResponse(openid_response)
         if sreg_response:
             nickname = sreg_response.get('nickname', 'openiduser')
