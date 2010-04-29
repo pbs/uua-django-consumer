@@ -1,13 +1,8 @@
 from django.test import TestCase
 from django.test.client import Client
-
 from django.http import Http404
-from openid.consumer import consumer
-from request_factory import RequestFactory
-
 from pbs_uua_consumer.auth import OpenIDBackend
 
-rf = RequestFactory()
 class GenericTestCase(TestCase):
     
     def setUp(self):
@@ -32,7 +27,7 @@ class GenericTestCase(TestCase):
             pass
     
     def test_authenticate(self):
-        response = {'openid_response' : {'success' : True}}
+        response = {'openid_response' : {'success' : True, }}
         try:
             authenticate(response)
         except:
