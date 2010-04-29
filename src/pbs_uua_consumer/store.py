@@ -7,6 +7,11 @@ from openid.store.nonce import SKEW
 
 from pbs_uua_consumer.models import Association, Nonce
 
+"""
+Generic store for the OpenId consumer.
+Implements methods for handling nonces and associations, while
+replacing the default openid model with a custom one.
+"""
 
 class DjangoOpenIDStore(OpenIDStore):
     def __init__(self):

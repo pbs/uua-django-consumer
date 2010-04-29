@@ -3,6 +3,11 @@ from django.db import models
 
 from django.db.models.signals import pre_delete
 
+"""
+Define custom models for the OpenId consumer and
+the users using the OpenId authentication.
+"""
+
 class Nonce(models.Model):
     server_url = models.CharField(max_length=2047)
     timestamp = models.IntegerField()
@@ -24,6 +29,9 @@ class Association(models.Model):
         return u"Association: %s, %s" % (self.server_url, self.handle)
 
 def delete_openid_user(sender, instance=None, **kwargs):
+    """ Cleanup method for user removal.
+    Makes sure that related table info is removed as well.
+    """
     if instance:
         try:
             openid_user = UserOpenID.objects.get(user=instance)

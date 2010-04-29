@@ -5,7 +5,6 @@ from urlparse import urlsplit
 from django.conf import settings
 from django.contrib.auth import (
     REDIRECT_FIELD_NAME, authenticate, login as auth_login)
-
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
@@ -17,22 +16,11 @@ from openid.consumer.consumer import (
 from openid.consumer.discover import DiscoveryFailure
 from openid.extensions import sreg, pape
 
-
-#from pbs_uua_consumer.forms import OpenIDLoginForm
 from pbs_uua_consumer.store import DjangoOpenIDStore
-
 from pbs_uua_consumer.extensions import UIExtension, SignatureVerification
 from pbs_uua_consumer.extensions import make_token
 
 next_url_re = re.compile('^/[-\w/]+$')
-
-def is_valid_next_url(next):
-    # When we allow this:
-    #   /openid/?next=/welcome/
-    # For security reasons we want to restrict the next= bit to being a local
-    # path, not a complete URL.
-    return bool(next_url_re.match(next))
-
 
 def sanitise_redirect_url(redirect_to):
     """Sanitise the redirection URL."""
@@ -83,12 +71,11 @@ def render_openid_request(request, openid_request, return_to, trust_root=None):
         form_html = openid_request.htmlMarkup(
             trust_root, return_to, form_tag_attrs={'id': 'openid_message'})
 
-        # TODO: verify if UTF-8 is default
         return HttpResponse(form_html, content_type='text/html;charset=UTF-8')
 
 
 def render_response(request, message=None, status=200, template_name='openid/response.html', redirect_to=None):
-    """Render an error page to the user."""
+    """Render a response page to the user."""
     response = render_to_string(
         template_name, {
             'redirect_to': redirect_to,
@@ -98,11 +85,7 @@ def render_response(request, message=None, status=200, template_name='openid/res
 
 def parse_openid_response(request):
     """Parse an OpenID response from a Django request."""
-    # Short cut if there is no request parameters.
-    #if len(request.REQUEST) == 0:
-    #    return None
     current_url = request.build_absolute_uri()
-
     consumer = make_consumer(request)
     return consumer.complete(dict(request.REQUEST.items()), current_url)
 
@@ -116,23 +99,23 @@ def login_begin(request, template_name='openid/login.html',
     # to use a fixed server URL.
     openid_url = getattr(settings, 'OPENID_SSO_SERVER_URL', None)
 
-
     if openid_url is None:
-        return render_to_response(template_name, {
-                'form': login_form,
-                redirect_field_name: redirect_to
-                }, context_instance=RequestContext(request))
+        return HttpResponseRedirect(redirect_field_name)
 
     error = None
+    # create the consumer based on Django request
     consumer = make_consumer(request)
     try:
+        # openid.consumer implements a discovery method.
+        # we use this to see if the openid_url is a valid
+        # OpenId provider
         openid_request = consumer.begin(openid_url)
     except DiscoveryFailure, exc:
         return render_response(
             request, "OpenID discovery error: %s" % (str(exc),), status=200)
 
-    # TODO: create setting for req signing extension
-    # verify exists keys
+    # based on the instance configuration, add PBS extensions for correct
+    # use of login.pbs.org
     if hasattr(settings,'UUA_CONSUMER_SHARED_KEY') and hasattr(settings,'UUA_CONSUMER_SECRET_KEY'):
         openid_request.addExtension(SignatureVerification(
                         settings.UUA_CONSUMER_SHARED_KEY,
@@ -140,18 +123,18 @@ def login_begin(request, template_name='openid/login.html',
                         make_token(64) #request token to sign
                     ))
 
+    # if we use the popover mode, add the appropriate extension
     if settings.OPENID_USE_POPUP_MODE:
         openid_request.addExtension(UIExtension("popup"))
+
     # Request some user details.
     openid_request.addExtension(
         sreg.SRegRequest(optional=['email', 'fullname', 'nickname']))
-    # Request team info
 
     # Construct the request completion URL, including the page we
     # should redirect to.
     return_to = request.build_absolute_uri(reverse(login_complete))
 
-    # TODO: use urldecode, parse as list
     if redirect_to:
         if '?' in return_to:
             return_to += '&'
@@ -163,17 +146,21 @@ def login_begin(request, template_name='openid/login.html',
 
 
 def login_complete(request, redirect_field_name=REDIRECT_FIELD_NAME):
+    """ Handle the OpenId response"""
     redirect_to = request.REQUEST.get(redirect_field_name, '')
 
     openid_response = parse_openid_response(request)
     if not openid_response:
+        # we have no response so we should send the RP endpoint message
         return render_response(
             request, 'This is an OpenID relying party endpoint.')
 
     if openid_response.status == SUCCESS:
+        # authenticate using openid custom authentication backend
         user = authenticate(openid_response=openid_response)
         if user is not None:
             if user.is_active:
+                # login the user
                 auth_login(request, user)
                 if settings.OPENID_USE_POPUP_MODE:
                     return render_response(request, status=200, redirect_to=sanitise_redirect_url(redirect_to))
@@ -195,6 +182,7 @@ def login_complete(request, redirect_field_name=REDIRECT_FIELD_NAME):
 
 
 def logo(request):
+    """ Serve the OpenId logo from this view. Allows quick embedding in forms"""
     return HttpResponse(
         OPENID_LOGO_BASE_64.decode('base64'), mimetype='image/gif'
     )

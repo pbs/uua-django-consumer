@@ -16,7 +16,10 @@ registerNamespaceAlias(ns_uri_ui_extension, 'ui')
 ns_uri_signed = 'http://pbs.org/openid/extensions/signature_verification/1.0'
 registerNamespaceAlias(ns_uri_signed, 'signature_verification')
 
-
+"""
+Custom extensions are defined here.
+They are required by login.pbs.org for enhanced security and user experience.
+"""
 def make_token(length=32):
     return urlsafe_b64encode(urandom(length)).strip("=")
 
@@ -85,8 +88,6 @@ class SignatureVerification(Extension):
                 "%s-%s" % (str(self.request_token), self.timestamp),
                 hashlib.sha1
         ).digest())
-
-
 
     @classmethod
     def fromRequest(cls, request):
