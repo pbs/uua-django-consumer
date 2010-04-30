@@ -13,9 +13,10 @@ Implements methods for handling nonces and associations, while
 replacing the default openid model with a custom one.
 """
 
+
 class DjangoOpenIDStore(OpenIDStore):
     def __init__(self):
-        self.max_nonce_age = 6 * 60 * 60 # Six hours
+        self.max_nonce_age = 6 * 60 * 60  # Six hours
 
     def storeAssociation(self, server_url, association):
         try:
@@ -48,8 +49,7 @@ class DjangoOpenIDStore(OpenIDStore):
         for assoc in assocs:
             association = OIDAssociation(
                 assoc.handle, base64.decodestring(assoc.secret), assoc.issued,
-                assoc.lifetime, assoc.assoc_type
-            )
+                assoc.lifetime, assoc.assoc_type)
             if association.getExpiresIn() == 0:
                 expired.append(assoc)
             else:

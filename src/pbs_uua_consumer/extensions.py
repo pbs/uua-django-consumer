@@ -1,13 +1,14 @@
 from base64 import urlsafe_b64encode
 from os import urandom
-import time, hmac, hashlib
+import time
+import hmac
+import hashlib
 from binascii import hexlify
 
 from openid.message import registerNamespaceAlias, \
      NamespaceAliasRegistrationError
 from openid.extension import Extension
 from openid import oidutil
-
 
 ns_uri_ui_extension = 'http://pbs.org/openid/extensions/ui/1.0'
 OPENID_UI_TYPE = 'http://pbs.org/openid/extensions/ui/1.0'
@@ -21,6 +22,7 @@ Custom extensions are defined here.
 They are required by login.pbs.org for enhanced security and user experience.
 """
 
+
 def make_token(length=32):
     return urlsafe_b64encode(urandom(length)).strip("=")
 
@@ -33,13 +35,10 @@ class UIExtension(Extension):
         self.mode = mode
 
     def __str__(self):
-        return '<UIExtension mode:%s >' % (
-            self.mode
-        )
+        return '<UIExtension mode:%s >' % (self.mode)
+
     def getExtensionArgs(self):
-        return {
-            'mode':self.mode,
-        }
+        return {'mode': self.mode, }
 
     @classmethod
     def fromRequest(cls, request):
@@ -56,6 +55,7 @@ class UIExtension(Extension):
         except:
             return False
 
+
 class SignatureVerification(Extension):
     ns_uri = ns_uri_signed
     ns_alias = 'signature_verification'
@@ -70,8 +70,7 @@ class SignatureVerification(Extension):
 
     def __str__(self):
         return '<SignatureVerification request_token:%s secret_key:%s consumer_key:%s hmac:%s timestamp:%s>' % (
-            self.request_token, self.secret_key, self.consumer_key, self.hmac, self.timestamp
-        )
+            self.request_token, self.secret_key, self.consumer_key, self.hmac, self.timestamp)
 
     def getExtensionArgs(self):
         if not self.secret_key:
@@ -80,20 +79,16 @@ class SignatureVerification(Extension):
         self.hmac = self._make_hmac(self.secret_key)
 
         return {
-            'request_token':self.request_token,
-            'consumer_key':self.consumer_key,
-            'hmac':self.hmac,
-            'timestamp':str(self.timestamp)
-        }
+            'request_token': self.request_token,
+            'consumer_key': self.consumer_key,
+            'hmac': self.hmac,
+            'timestamp': str(self.timestamp)}
 
     def _make_hmac(self, secret):
         return hexlify(hmac.new(
                 str(secret),
                 "%s-%s" % (str(self.request_token), self.timestamp),
-                hashlib.sha1
-        ).digest())
-
-
+                hashlib.sha1).digest())
 
     @classmethod
     def fromRequest(cls, request):
@@ -104,7 +99,6 @@ class SignatureVerification(Extension):
             except:
                 timestamp = None
             return cls(args['consumer_key'],
-                request_token = args['request_token'],
-                hmac = args['hmac'],
-                timestamp = timestamp
-            )
+                request_token=args['request_token'],
+                hmac=args['hmac'],
+                timestamp=timestamp)
