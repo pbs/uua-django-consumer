@@ -90,7 +90,7 @@ def parse_openid_response(request):
     return consumer.complete(dict(request.REQUEST.items()), current_url)
 
 
-def login_begin(request, template_name='openid/login.html',
+def login_begin(request, popup_mode=1,template_name='openid/login.html',
                 redirect_field_name=REDIRECT_FIELD_NAME):
     """Begin an OpenID login request, possibly asking for an identity URL."""
     redirect_to = request.REQUEST.get(redirect_field_name, '')
@@ -124,7 +124,12 @@ def login_begin(request, template_name='openid/login.html',
                     ))
 
     # if we use the popover mode, add the appropriate extension
-    if settings.OPENID_USE_POPUP_MODE:
+
+    if popup_mode==1:
+        popup_mode = getattr(settings, 'OPENID_USE_POPUP_MODE', False)
+    else:
+        popup_mode = False
+    if popup_mode:
         openid_request.addExtension(UIExtension("popup"))
 
     # Request some user details.
@@ -154,7 +159,7 @@ def login_complete(request, redirect_field_name=REDIRECT_FIELD_NAME):
         # we have no response so we should send the RP endpoint message
         return render_response(
             request, 'This is an OpenID relying party endpoint.')
-
+    popup = UIExtension.fromResponse(openid_response)
     if openid_response.status == SUCCESS:
         # authenticate using openid custom authentication backend
         user = authenticate(openid_response=openid_response)
@@ -162,7 +167,7 @@ def login_complete(request, redirect_field_name=REDIRECT_FIELD_NAME):
             if user.is_active:
                 # login the user
                 auth_login(request, user)
-                if settings.OPENID_USE_POPUP_MODE:
+                if popup:
                     return render_response(request, status=200, redirect_to=sanitise_redirect_url(redirect_to))
                 else:
                     return HttpResponseRedirect(redirect_to=sanitise_redirect_url(redirect_to))

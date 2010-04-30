@@ -6,20 +6,14 @@ from django.utils.safestring import mark_safe
 quick integration.
 """
 def openid_config(request):
-    if hasattr(settings, 'OPENID_USE_POPUP_MODE'):
-        popup_mode = settings.OPENID_USE_POPUP_MODE
-    else:
-        popup_mode = False
+    popup_mode = getattr(settings,'OPENID_USE_POPUP_MODE', False)
 
     sso_url = mark_safe(u"%s?next=%s" % (reverse('login_begin'), request.get_full_path()),)
 
-    if hasattr(settings, 'OPENID_SSO_SERVER_JS_URL'):
-        sso_js_url = settings.OPENID_SSO_SERVER_JS_URL
-    else:
-        sso_js_url = ''
+    sso_js_url = getattr(settings,'OPENID_SSO_SERVER_JS_URL', '')
 
-    if settings.OPENID_USE_POPUP_MODE:
-        href = u'javascript:void(null)" onClick="javascript:loadPopup();'
+    if popup_mode:
+        href = u'%s?next=%s" onClick="javascript:loadPopup();return false;' % (reverse('login_begin', kwargs={'popup_mode':0}), request.get_full_path())
     else:
         href = u'%s?next=%s' % (reverse('login_begin'), request.get_full_path())
 

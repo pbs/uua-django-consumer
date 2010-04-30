@@ -20,6 +20,7 @@ registerNamespaceAlias(ns_uri_signed, 'signature_verification')
 Custom extensions are defined here.
 They are required by login.pbs.org for enhanced security and user experience.
 """
+
 def make_token(length=32):
     return urlsafe_b64encode(urandom(length)).strip("=")
 
@@ -48,9 +49,12 @@ class UIExtension(Extension):
 
     @classmethod
     def fromResponse(cls, response):
-        args = response.message.getArgs(cls.ns_uri)
-        if args:
-            return cls(args['mode'])
+        try:
+            args = response.message.getArgs(cls.ns_uri)
+            if args:
+                return cls(args['mode'])
+        except:
+            return False
 
 class SignatureVerification(Extension):
     ns_uri = ns_uri_signed
@@ -88,6 +92,8 @@ class SignatureVerification(Extension):
                 "%s-%s" % (str(self.request_token), self.timestamp),
                 hashlib.sha1
         ).digest())
+
+
 
     @classmethod
     def fromRequest(cls, request):
