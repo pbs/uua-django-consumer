@@ -11,6 +11,7 @@ from django.views.decorators.cache import never_cache
 Registers admin models and the authentication backend with Django admin.
 """
 
+
 class NonceAdmin(admin.ModelAdmin):
     """ OpenId Nonces admin form """
 
@@ -65,12 +66,13 @@ if getattr(settings, 'OPENID_USE_AS_ADMIN_LOGIN', False):
 
             }
         context.update(extra_context or {})
-        context_instance = template.RequestContext(request, current_app=self.name)
+        context_instance = template.RequestContext(request,
+                                    current_app=self.name)
         if request.user.is_authenticated():
             if not request.user.is_staff:
-                context['error_message']="User %s does not have admin access." % request.user.username
+                context['error_message'] = "User %s does not have admin access." % request.user.username
             else:
-                context['error_message']="Unknown Error: %s" % error_message
+                context['error_message'] = "Unknown Error: %s" % error_message
         else:
             request.session.set_test_cookie()
 

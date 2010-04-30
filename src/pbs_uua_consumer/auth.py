@@ -11,13 +11,13 @@ Custom authentication backend for the OpenId consumer.
 For further information, consult
 http://docs.djangoproject.com/en/dev/topics/auth/#writing-an-authentication-backend
 """
+
+
 class IdentityAlreadyClaimed(Exception):
     pass
 
 
 class OpenIDBackend:
-
-
     def get_user(self, user_id):
         try:
             return User.objects.get(pk=user_id)

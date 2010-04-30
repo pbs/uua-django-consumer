@@ -22,6 +22,7 @@ from pbs_uua_consumer.extensions import make_token
 
 next_url_re = re.compile('^/[-\w/]+$')
 
+
 def sanitise_redirect_url(redirect_to):
     """Sanitise the redirection URL."""
     # Light security check -- make sure redirect_to isn't garbage.
@@ -83,6 +84,7 @@ def render_response(request, message=None, status=200, template_name='openid/res
         }, context_instance=RequestContext(request))
     return HttpResponse(response, status=status)
 
+
 def parse_openid_response(request):
     """Parse an OpenID response from a Django request."""
     current_url = request.build_absolute_uri()
@@ -90,7 +92,7 @@ def parse_openid_response(request):
     return consumer.complete(dict(request.REQUEST.items()), current_url)
 
 
-def login_begin(request, popup_mode=1,template_name='openid/login.html',
+def login_begin(request, popup_mode=1, template_name='openid/login.html',
                 redirect_field_name=REDIRECT_FIELD_NAME):
     """Begin an OpenID login request, possibly asking for an identity URL."""
     redirect_to = request.REQUEST.get(redirect_field_name, '')
@@ -116,16 +118,14 @@ def login_begin(request, popup_mode=1,template_name='openid/login.html',
 
     # based on the instance configuration, add PBS extensions for correct
     # use of login.pbs.org
-    if hasattr(settings,'UUA_CONSUMER_SHARED_KEY') and hasattr(settings,'UUA_CONSUMER_SECRET_KEY'):
+    if hasattr(settings, 'UUA_CONSUMER_SHARED_KEY') and hasattr(settings, 'UUA_CONSUMER_SECRET_KEY'):
         openid_request.addExtension(SignatureVerification(
                         settings.UUA_CONSUMER_SHARED_KEY,
                         settings.UUA_CONSUMER_SECRET_KEY,
-                        make_token(64) #request token to sign
-                    ))
+                        make_token(64)))  # request token to sign
 
     # if we use the popover mode, add the appropriate extension
-
-    if popup_mode==1:
+    if popup_mode == 1:
         popup_mode = getattr(settings, 'OPENID_USE_POPUP_MODE', False)
     else:
         popup_mode = False
@@ -189,10 +189,7 @@ def login_complete(request, redirect_field_name=REDIRECT_FIELD_NAME):
 def logo(request):
     """ Serve the OpenId logo from this view. Allows quick embedding in forms"""
     return HttpResponse(
-        OPENID_LOGO_BASE_64.decode('base64'), mimetype='image/gif'
-    )
-
-
+        OPENID_LOGO_BASE_64.decode('base64'), mimetype='image/gif')
 
 OPENID_LOGO_BASE_64 = """
 R0lGODlhEAAQAMQAAO3t7eHh4srKyvz8/P5pDP9rENLS0v/28P/17tXV1dHEvPDw8M3Nzfn5+d3d

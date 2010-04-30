@@ -8,6 +8,7 @@ Define custom models for the OpenId consumer and
 the users using the OpenId authentication.
 """
 
+
 class Nonce(models.Model):
     server_url = models.CharField(max_length=2047)
     timestamp = models.IntegerField()
@@ -20,13 +21,14 @@ class Nonce(models.Model):
 class Association(models.Model):
     server_url = models.TextField(max_length=2047)
     handle = models.CharField(max_length=255)
-    secret = models.TextField(max_length=255) # Stored base64 encoded
+    secret = models.TextField(max_length=255)  # Stored base64 encoded
     issued = models.IntegerField()
     lifetime = models.IntegerField()
     assoc_type = models.TextField(max_length=64)
 
     def __unicode__(self):
         return u"Association: %s, %s" % (self.server_url, self.handle)
+
 
 def delete_openid_user(sender, instance=None, **kwargs):
     """ Cleanup method for user removal.
@@ -40,6 +42,7 @@ def delete_openid_user(sender, instance=None, **kwargs):
             pass
 
 pre_delete.connect(delete_openid_user, sender=User)
+
 
 class UserOpenID(models.Model):
     user = models.ForeignKey(User)
