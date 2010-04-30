@@ -77,8 +77,6 @@ class OpenIDBackend:
             i += 1
 
         user = User.objects.create_user(username, email, password=None)
-        user.is_staff=True
-        user.is_superuser=True
         user.save()
         if sreg_response:
             self.update_user_details_from_sreg(user, sreg_response)
