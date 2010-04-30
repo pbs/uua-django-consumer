@@ -57,25 +57,24 @@ if getattr(settings, 'OPENID_USE_AS_ADMIN_LOGIN', False):
     from pbs_uua_consumer import views
 
     def _openid_login(self, request, error_message='', extra_context=None):
-        if request.user.is_authenticated():
-            if not request.user.is_staff:
-                return views.render_response(
-                    request, "User %s does not have admin access."
-                    % request.user.username)
-            return views.render_response(
-                request, "Unknown Error: %s" % error_message)
-        else:
-            request.session.set_test_cookie()
-            context = {
+        context = {
                 'title': _('Log in'),
                 'app_path': request.get_full_path(),
                 'error_message': error_message,
                 'root_path': self.root_path,
 
             }
-            context.update(extra_context or {})
-            context_instance = template.RequestContext(request, current_app=self.name)
-            return render_to_response(admin.sites.AdminSite.login_template or 'admin/login.html', context,
+        context.update(extra_context or {})
+        context_instance = template.RequestContext(request, current_app=self.name)
+        if request.user.is_authenticated():
+            if not request.user.is_staff:
+                context['error_message']="User %s does not have admin access." % request.user.username
+            else:
+                context['error_message']="Unknown Error: %s" % error_message
+        else:
+            request.session.set_test_cookie()
+
+        return render_to_response(admin.sites.AdminSite.login_template or 'admin/login.html', context,
                 context_instance=context_instance)
 
     login_template = getattr(settings, 'OPENID_ADMIN_LOGIN_TEMPLATE', False)
