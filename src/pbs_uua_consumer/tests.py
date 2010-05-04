@@ -29,6 +29,9 @@ class GenericTestCase(TestCase):
         x.message = message.Message()
         x.status = SUCCESS
         x.identity_url = "http://192.168.1.121:8081/u/BdwAEHKnlO_W3zOWh0TMcQ"
+        x.sreg.fullname='First Last'
+        x.sreg.nickname='User1234'
+        x.sreg.email='user@testemail.org'
         return x
 
     def setUp(self):
@@ -52,10 +55,9 @@ class GenericTestCase(TestCase):
         except:
             pass
 
-    def test_authenticate_ok(self):
+    def test_create_user_from_openid(self):
         openid_response = self.mock
-        #The make_mock is eroneous. Please help !
-        #user = self.backend.authenticate(openid_response = self.mock)
+        OpenIDBackend.authenticate(openid_response=openid_response)
 
 class ModelsTests(TestCase):
     def test_delete_user(self):
@@ -76,3 +78,5 @@ class ModelsTests(TestCase):
 
         # Delete the second user. It must be done gracefully.
         user2.delete()
+
+
