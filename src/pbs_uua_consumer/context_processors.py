@@ -13,7 +13,7 @@ def openid_config(request):
     sso_js_url = getattr(settings, 'OPENID_SSO_SERVER_JS_URL', '')
 
     if popup_mode:
-        href = u'%s?next=%s" onClick="javascript:loadPopup();return false;' % (reverse('login_begin',
+        href = u'%s?next=%s" onClick="javascript:loadPopup();return false;' % (reverse('login_begin_popup',
                                                 kwargs={'popup_mode': 0}), request.get_full_path())
     else:
         href = u'%s?next=%s' % (reverse('login_begin'), request.get_full_path())

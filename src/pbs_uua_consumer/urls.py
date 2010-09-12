@@ -8,7 +8,7 @@ complete - handles an openid response
 logo.gif - serves the openid logo for frontend
 """
 urlpatterns = patterns('pbs_uua_consumer.views',
-    url(r'^login/(?P<popup_mode>0|1)/$', 'login_begin', name='login_begin'),
+    url(r'^login/(?P<popup_mode>0|1)/$', 'login_begin', name='login_begin_popup'),
     url(r'^login/$', 'login_begin', name='login_begin'),
     url(r'^logo.gif$', 'logo', name='openid-logo'),
     (r'^complete/$', 'login_complete'),
