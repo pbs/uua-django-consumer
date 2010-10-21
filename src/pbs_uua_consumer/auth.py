@@ -109,7 +109,7 @@ class OpenIDBackend:
         if fullname:
             # Do our best here ...
             if ' ' in fullname:
-                user.first_name, user.last_name = fullname.rsplit(None, 1)
+                user.first_name, _, user.last_name = fullname.rpartition(' ')
             else:
                 user.first_name = u''
                 user.last_name = fullname
