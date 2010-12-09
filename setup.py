@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pbs_uua_consumer',
-    version='0.1',
+    version='1.0',
     description='',
     author='',
     author_email='',
