@@ -53,6 +53,15 @@ class OpenIDBackend:
 
         return user
 
+    def get_user_instance(self, username, email):
+        """ this method can be overriden to update and return the instance of
+        an existing user instead of creating a new user when logging in with
+        OpenId
+        """
+        user = User.objects.create_user(username, email)
+        user.save()
+        return user
+
     def create_user_from_openid(self, openid_response):
         """ internal method for creating users from a correct OpenId auth flow """
         sreg_response = sreg.SRegResponse.fromSuccessResponse(openid_response)
@@ -75,9 +84,9 @@ class OpenIDBackend:
             except User.DoesNotExist:
                 break
             i += 1
+        
+        user = self.get_user_instance(username, email)
 
-        user = User.objects.create_user(username, email, password=None)
-        user.save()
         if sreg_response:
             self.update_user_details_from_sreg(user, sreg_response)
 
