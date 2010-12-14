@@ -1,0 +1,1 @@
+recursive-include src/pbs_uua_consumer/templates *
