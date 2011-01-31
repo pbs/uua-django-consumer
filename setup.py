@@ -8,4 +8,5 @@ setup(
     author_email='no-reply@pbs.org',
     packages = find_packages('src'),
     package_dir={'':'src'},
+    include_package_data=True
 )
